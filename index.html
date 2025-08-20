@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centroid Visualization</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 2em;
+    }
+    canvas {
+      border: 1px solid #aaa;
+      background: #fff;
+      margin-bottom: 1em;
+    }
+    button {
+      padding: 0.5em 1.5em;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      background: #0078d4;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <h2>Centroid Visualization</h2>
+  <canvas id="canvas" width="500" height="400"></canvas>
+  <button id="regen">Generate Example</button>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const N_POINTS = 7;
+    const POINT_RADIUS = 6;
+    const CENTROID_RADIUS = 9;
+
+    function randomPoints(n, w, h, margin=40) {
+      return Array.from({length: n}, () => ({
+        x: Math.random() * (w - 2*margin) + margin,
+        y: Math.random() * (h - 2*margin) + margin
+      }));
+    }
+
+    function computeCentroid(points) {
+      const sum = points.reduce((acc, p) => ({
+        x: acc.x + p.x,
+        y: acc.y + p.y
+      }), {x:0, y:0});
+      return {
+        x: sum.x / points.length,
+        y: sum.y / points.length
+      };
+    }
+
+    function draw(points, centroid) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw dotted lines
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = '#888';
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(centroid.x, centroid.y);
+        ctx.stroke();
+      });
+      ctx.restore();
+      // Draw points
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, POINT_RADIUS, 0, 2*Math.PI);
+        ctx.fillStyle = '#0078d4';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+      // Draw centroid
+      ctx.beginPath();
+      ctx.arc(centroid.x, centroid.y, CENTROID_RADIUS, 0, 2*Math.PI);
+      ctx.fillStyle = '#e81123';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    function generate() {
+      const points = randomPoints(N_POINTS, canvas.width, canvas.height);
+      const centroid = computeCentroid(points);
+      draw(points, centroid);
+    }
+
+    document.getElementById('regen').onclick = generate;
+    generate();
+  </script>
+</body>
+</html>
